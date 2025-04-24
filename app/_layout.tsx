@@ -9,6 +9,7 @@ import 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/useColorScheme';
 
 import './global.css'
+import RootNavigator from './navigation/RootNavigator';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -31,10 +32,7 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
+      <RootNavigator/> {/* This is fake news, the real entry point is not this but in app/index.tsx */}
       <StatusBar style="auto" />
     </ThemeProvider>
   );
