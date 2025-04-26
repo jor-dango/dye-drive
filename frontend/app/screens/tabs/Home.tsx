@@ -1,10 +1,18 @@
 import { supabase } from '@/lib/supabase'
 import { Link, useRouter } from 'expo-router';
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Button, Text, View } from 'react-native'
 
 function Home() {
   const router = useRouter();
+
+
+  useEffect(() => {
+    if (router.canDismiss()) {
+      router.dismissAll();
+      router.replace('/screens/tabs/Home')
+    }
+  }, []);
 
   async function handlePress() {
     try {
@@ -17,9 +25,9 @@ function Home() {
   }
 
   return (
-    <View className='bg-accent mt-20'>
+    <View className='p-10 py-20'>
       <Text>This is home</Text>
-      <Button title="eweww" onPress={handlePress}/>
+      <Button title="log out" onPress={handlePress} />
       <Link href="/screens/onboarding/Onboarding1">eowiqje</Link>
     </View>
   )

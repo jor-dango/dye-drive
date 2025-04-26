@@ -24,7 +24,6 @@ function EntryPoint() {
           .not('visualalertstyle', 'is', null)
           .eq('id', user.id);
 
-          console.log("user data: ", count)
           if (count === 1) { // This is true if the preferences are done being completed because the row exists AND visualalertstyle isnt null
             setFinishedPrefs(true);
           }

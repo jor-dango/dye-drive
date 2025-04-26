@@ -3,13 +3,20 @@ import TypeStyles from '@/constants/TypeStyles';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useRouter } from 'expo-router';
 import { ArrowRight } from 'lucide-react-native';
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Text, TouchableOpacity, View } from 'react-native'
 
 function Welcome() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
+
+  useEffect(() => {
+    if (router.canDismiss()) {
+      router.dismissAll();
+      router.replace('/screens/onboarding/Welcome')
+    }
+  }, [])
 
   return (
     <View className='w-full h-full flex gap-3 p-10 py-20' style={{ backgroundColor: colors.background }}>

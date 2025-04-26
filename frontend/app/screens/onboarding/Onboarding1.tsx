@@ -41,6 +41,13 @@ function Onboarding1() {
     },
   ];
 
+    useEffect(() => {
+      if (router.canDismiss()) {
+        router.dismissAll();
+        router.replace('/screens/onboarding/Onboarding1')
+      }
+    }, [])
+
   async function handleOnboarding() {
     setLoading(true);
 
@@ -50,7 +57,6 @@ function Onboarding1() {
       return;
     }
     const { data: { user } } = await supabase.auth.getUser();
-    console.log("in onboarding1.", user);
 
     if (user) {
       // Check if the user already has entries; ie. has already started the onboarding process
