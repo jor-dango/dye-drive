@@ -129,7 +129,7 @@ function Onboarding1() {
         />
       </View>
       <View className='flex gap-2'>
-        <Text style={[TypeStyles.h3, { color: colors.text }]}>Select a language</Text>
+        <Text style={[TypeStyles.h3, { color: colors.text }]}>Select your colorblindness</Text>
         <SelectList
           setSelected={(val: string) => setSelectedDeficiency(val)}
           data={deficiencies}

@@ -31,8 +31,9 @@ export default function Auth() {
 
         if (error)
             Alert.alert(error.message)
-        else
-            router.navigate("/screens/onboarding/Onboarding1")
+        else {
+            router.navigate("/")
+        }
         setLoading(false)
     }
 

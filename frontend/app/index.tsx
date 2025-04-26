@@ -17,13 +17,15 @@ function EntryPoint() {
         setUser(user);
 
         if (user) {
+          
           const { count, error } = await supabase
           .from('userprefs')
-          .select('visualalertstyle', { count: 'exact', head: true })
-          .is('visualalertstyle', null);
+          .select('*', { count: 'exact', head: true })
+          .not('visualalertstyle', 'is', null)
+          .eq('id', user.id);
 
           console.log("user data: ", count)
-          if (count === 0) { // This is true if the preferences are done being completed because visualalertstyle is not null 
+          if (count === 1) { // This is true if the preferences are done being completed because the row exists AND visualalertstyle isnt null
             setFinishedPrefs(true);
           }
 
