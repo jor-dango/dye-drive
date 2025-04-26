@@ -58,11 +58,8 @@ function Onboarding1() {
         .from('userprefs')
         .select('*', { count: 'exact', head: true })
         .eq('id', user.id);
-      
-        console.log("data: ", count)
 
       if (count !== 0) { // If they have, just update their preferences
-        console.log("user exists")
         const { error } = await supabase
           .from('userprefs')
           .update({
@@ -76,7 +73,6 @@ function Onboarding1() {
         }
       }
       else { // Otherwise, make a new row      
-        console.log("user does not exist")  
         const { error } = await supabase
           .from('userprefs')
           .insert({
