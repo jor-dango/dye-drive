@@ -1,7 +1,6 @@
 import { Colors } from '@/constants/Colors';
 import TypeStyles from '@/constants/TypeStyles';
 import { supabase } from '@/lib/supabase';
-import { User } from '@supabase/supabase-js';
 import { useRouter } from 'expo-router';
 import { ArrowLeft, ArrowRight, ChevronDown } from 'lucide-react-native';
 import React, { useEffect, useState } from 'react'
