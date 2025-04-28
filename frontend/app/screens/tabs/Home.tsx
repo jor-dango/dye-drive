@@ -77,7 +77,7 @@ function Home() {
         <View className='flex-1' />
         <View className='w-full flex items-center gap-4'>
           <Text style={[TypeStyles.p, { color: colors.text }]}>Start a drive</Text>
-          <TouchableOpacity className='w-3/4 aspect-square'>
+          <TouchableOpacity className='w-3/4 aspect-square' onPress={() => router.navigate('/screens/tabs/Driving')}>
             <LinearGradient
               colors={['#6663A6', '#464383']}
               style={{ width: '100%', height: '100%', borderRadius: 99999, padding: 20 }}
