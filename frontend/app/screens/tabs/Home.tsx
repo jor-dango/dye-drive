@@ -68,7 +68,7 @@ function Home() {
   }
 
   return (
-    <View className='w-full h-full flex gap-4 p-10 py-20' style={{ backgroundColor: colors.background }}>
+    <View className='w-full h-full flex gap-4 p-10 pt-20' style={{ backgroundColor: colors.background }}>
 
       {/* Main content */}
       <Animated.View className='flex-1' style={{ opacity: fadeOutVal }}>

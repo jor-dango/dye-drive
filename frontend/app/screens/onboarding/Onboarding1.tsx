@@ -1,4 +1,5 @@
 import { Colors } from '@/constants/Colors';
+import { deficiencies, langs } from '@/constants/PreferenceVals';
 import TypeStyles from '@/constants/TypeStyles';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'expo-router';
@@ -17,28 +18,6 @@ function Onboarding1() {
   const [selectedDeficiency, setSelectedDeficiency] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [foundError, setFoundError] = useState(false);  
-
-  const langs = [
-    {
-      key: "en",
-      value: "English"
-    },
-    {
-      key: "es",
-      value: "Spanish"
-    },
-  ];
-
-  const deficiencies = [
-    {
-      key: "deuteranopia",
-      value: "Deuteranopia"
-    },
-    {
-      key: "tritanopia",
-      value: "Tritanopia"
-    },
-  ];
 
     useEffect(() => {
       if (router.canDismiss()) {

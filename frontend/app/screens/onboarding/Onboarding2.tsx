@@ -1,4 +1,6 @@
 import { Colors } from '@/constants/Colors';
+import { audioAlertStyles, visualAlertStyles } from '@/constants/PreferenceVals';
+import { AudioAlertTypes, VisualAlertTypes } from '@/constants/types';
 import TypeStyles from '@/constants/TypeStyles';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'expo-router';
@@ -7,8 +9,7 @@ import React, { useState } from 'react'
 import { Alert, ScrollView, TouchableOpacity } from 'react-native';
 import { Text, useColorScheme, View } from 'react-native'
 
-type AudioAlertTypes = 'color' | 'action' | 'nothing';
-type VisualAlertTypes = 'shapes' | 'words' | 'both';
+
 
 function Onboarding2() {
   const colorScheme = useColorScheme();
@@ -19,48 +20,6 @@ function Onboarding2() {
   const [selectedVisualAlert, setSelectedVisualAlert] = useState<VisualAlertTypes | null>(null);
   const [loading, setLoading] = useState(false);
   const [foundError, setFoundError] = useState(false);
-
-  const audioAlertStyles:
-    {
-      text: string,
-      secondaryText: string | null,
-      ref: AudioAlertTypes
-    }[] = [
-      {
-        text: "Say the light color",
-        secondaryText: "ex. Green, Yellow, Red",
-        ref: "color"
-      },
-      {
-        text: "Say the light action",
-        secondaryText: "ex. Go, Yield, Stop",
-        ref: "action"
-      },
-      {
-        text: "Say nothing",
-        secondaryText: null,
-        ref: "nothing"
-      },
-    ]
-
-  const visualAlertStyles:
-    {
-      text: string,
-      ref: VisualAlertTypes
-    }[] = [
-      {
-        text: "Shapes",
-        ref: "shapes"
-      },
-      {
-        text: "Words",
-        ref: "words"
-      },
-      {
-        text: "Both",
-        ref: "both"
-      },
-    ]
 
   async function handleOnboarding() {
     setLoading(true);

@@ -51,7 +51,7 @@ function Profile() {
 
 
   return (
-    <View className='w-full h-full flex gap-4 p-10 py-20' style={{ backgroundColor: colors.background }}>
+    <View className='w-full h-full flex gap-4 p-10 pt-20' style={{ backgroundColor: colors.background }}>
       <Animated.View style={{ opacity: fadeOutVal }} className={'bg-accent w-full flex-1'}>
         <Text>Profile</Text>
       </Animated.View>
