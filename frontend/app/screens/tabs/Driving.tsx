@@ -1,4 +1,11 @@
+import { GoBottom, GoTop, StopBottom, StopTop, YieldBottom, YieldTop } from "@/components/ui/DrivingSVGs";
+import { Colors } from "@/constants/Colors";
+import TypeStyles from "@/constants/TypeStyles";
+import { useColorScheme } from "@/hooks/useColorScheme";
+import { supabase } from "@/lib/supabase";
+import { User } from "@supabase/supabase-js";
 import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
+import { useRouter } from "expo-router";
 import { useRef, useState, useEffect } from "react";
 import {
   Button,
@@ -7,15 +14,83 @@ import {
   TouchableOpacity,
   View,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 
+const SVG_HEIGHT = '15%';
+
 export default function App() {
+  const router = useRouter();
   const [facing, setFacing] = useState<CameraType>("back");
   const [permission, requestPermission] = useCameraPermissions();
   const [isDetecting, setIsDetecting] = useState(false);
   const [detection, setDetection] = useState<any>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const cameraRef = useRef<any>(null);
+
+  const colorScheme = useColorScheme();
+  const colors = Colors[colorScheme ?? 'light'];
+  const lightColors = {
+    green: "#03CA03",
+    yellow: "#E2B500",
+    red: '#E10707'
+  };
+  // const lightText = [
+  //   {
+  //     key: 'green',
+  //     topElement: <GoTop height={SVG_HEIGHT} color={colors.secondary} />,
+  //     bottomElement: <GoBottom height={SVG_HEIGHT} color={lightColors.green} />,
+  //     lightColor: 'GREEN',
+  //     lightAction: 'GO'
+  //   },
+  //   {
+  //     key: 'yellow',
+  //     topElement: <YieldTop height={SVG_HEIGHT} color={colors.secondary} />,
+  //     bottomElement: <YieldBottom height={SVG_HEIGHT} color={lightColors.green} />,
+  //     lightColor: 'YELLOW',
+  //     lightAction: 'YIELD'
+  //   },
+  //   {
+  //     key: 'red',
+  //     topElement: <StopTop height={SVG_HEIGHT} color={colors.secondary} />,
+  //     bottomElement: <StopBottom height={SVG_HEIGHT} color={lightColors.green} />,
+  //     lightColor: 'RED',
+  //     lightAction: 'STOP'
+  //   }
+  // ];
+
+  const [loading, setLoading] = useState(false);
+  const [foundError, setFoundError] = useState(false);
+  const [userPrefs, setUserPrefs] = useState<User | null>(null);
+
+  useEffect(() => {
+    async function loadPreferences() {
+      setLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (user) {
+        const { data, error } = await supabase
+          .from('userprefs')
+          .select('*')
+          .eq('id', user.id);
+        if (error) {
+          Alert.alert(error.message);
+          setFoundError(true);
+        }
+      }
+      else {
+        console.error("User not found.");
+        setFoundError(true);
+      }
+
+      if (foundError) {
+        router.back();
+      }
+      setUserPrefs(user);
+      setFoundError(false);
+      setLoading(false);
+    }
+  }, [])
 
   // Backend URL - replace with your actual backend URL
   // SUBJECT TO CHANGE EVERY TIME I REOPEN THE NGROK ENDPOINT
@@ -106,68 +181,123 @@ export default function App() {
   }
 
   return (
-    <View style={styles.container}>
-      <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
-        {/* Guide lines for middle third */}
-        <View style={[styles.guideline, { left: "33%" }]} />
-        <View style={[styles.guideline, { left: "67%" }]} />
+    <View className='w-full h-full flex gap-4 px-5 pb-10 pt-20' style={{ backgroundColor: colors.background }}>
 
-        {/* Detection result display */}
-        {detection && detection.success && detection.prediction && (
-          <View style={styles.detectionContainer}>
-            {detection.prediction.detected ? (
-              <View
-                style={[
-                  styles.trafficLight,
-                  detection.prediction.color === "red"
-                    ? styles.redLight
-                    : detection.prediction.color === "green"
-                    ? styles.greenLight
-                    : detection.prediction.color === "yellow"
-                    ? styles.yellowLight
-                    : styles.unknownLight,
-                ]}
-              >
-                <Text style={styles.lightText}>
-                  {detection.prediction.color.toUpperCase()}
-                </Text>
-                <Text style={styles.confidenceText}>
-                  {Math.round(detection.prediction.confidence * 100)}%
-                </Text>
-              </View>
-            ) : (
-              <Text style={styles.noDetectionText}>
-                {detection.prediction.message}
-              </Text>
-            )}
-          </View>
-        )}
+      <View className="flex flex-row">
+        <TouchableOpacity className="bg-accent px-6 py-4 rounded-full" onPress={() => router.back()}>
+          <Text style={[TypeStyles.p, { color: colors.text }]}>Finish Drive</Text>
+        </TouchableOpacity>
+      </View>
 
-        {/* Processing indicator */}
-        {isProcessing && (
-          <View style={styles.processingContainer}>
-            <ActivityIndicator size="large" color="#ffffff" />
-          </View>
-        )}
+      {/* Visual Display */}
+      <View className="w-full flex-1 rounded-2xl overflow-hidden p-3" style={{ backgroundColor: colors.secondary }}>
+        <View className="w-full flex-1 rounded-lg overflow-hidden justify-between " style={{ backgroundColor: colors.background }}>
 
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
-            <Text style={styles.text}>Flip Camera</Text>
-          </TouchableOpacity>
+          {/* Green */}
+          {detection && detection.success && detection.prediction && detection.prediction.color === "green" && (
+            <>
+              <GoTop height={SVG_HEIGHT} color={colors.secondary} />
+              <Text style={[TypeStyles.h1, { color: colors.text, textAlign: 'center', fontSize: 100 }]}>GO</Text>
+              <GoBottom height={SVG_HEIGHT} color={lightColors.green} />
+            </>
+          )}
 
-          <TouchableOpacity
-            style={[
-              styles.button,
-              isDetecting ? styles.stopButton : styles.startButton,
-            ]}
-            onPress={toggleDetection}
-          >
-            <Text style={styles.text}>
-              {isDetecting ? "Stop Detection" : "Start Detection"}
-            </Text>
-          </TouchableOpacity>
+          {/* Yellow */}
+          {detection && detection.success && detection.prediction && detection.prediction.color === "yellow" && (
+            <>
+              <YieldTop height={SVG_HEIGHT} color={colors.secondary} />
+              <Text style={[TypeStyles.h1, { color: colors.text, textAlign: 'center', fontSize: 100 }]}>YIELD</Text>
+              <YieldBottom height={SVG_HEIGHT} color={lightColors.yellow} />
+            </>
+          )}
+
+          {/* Red */}
+          {detection && detection.success && detection.prediction && detection.prediction.color === "yellow" && (
+            <>
+              <StopTop height={SVG_HEIGHT} color={colors.secondary} />
+              <Text style={[TypeStyles.h1, { color: colors.text, textAlign: 'center', fontSize: 100 }]}>YIELD</Text>
+              <StopBottom height={SVG_HEIGHT} color={lightColors.red} />
+            </>
+          )}
+
+          {/* Nunya detected */}
+          {detection && detection.success && detection.prediction && detection.prediction.color === null && (
+            <>
+              <View className="w-full h-[15%]" /> {/* This exists just for spacing */}
+              <Text style={[TypeStyles.h1, { color: colors.text, textAlign: 'center' }]}>No traffic light detected</Text>
+              <View className="w-full h-[15%] bg-[#9E9E9E]" />
+            </>
+          )}
+
         </View>
-      </CameraView>
+      </View>
+
+      {/* Camera Wrapper */}
+      <View className="w-full aspect-video rounded-2xl overflow-hidden">
+        <CameraView style={{ height: '100%', width: '100%' }} facing={facing} ref={cameraRef}>
+          {/* Guide lines for middle third */}
+          <View style={[styles.guideline, { left: "33%" }]} />
+          <View style={[styles.guideline, { left: "67%" }]} />
+
+          {/* Detection result display */}
+          {detection && detection.success && detection.prediction && (
+            <View style={styles.detectionContainer}>
+              {detection.prediction.detected ? (
+                <View
+                  style={[
+                    styles.trafficLight,
+                    detection.prediction.color === "red"
+                      ? styles.redLight
+                      : detection.prediction.color === "green"
+                        ? styles.greenLight
+                        : detection.prediction.color === "yellow"
+                          ? styles.yellowLight
+                          : styles.unknownLight,
+                  ]}
+                >
+                  <Text style={styles.lightText}>
+                    {detection.prediction.color.toUpperCase()}
+                  </Text>
+                  <Text style={styles.confidenceText}>
+                    {Math.round(detection.prediction.confidence * 100)}%
+                  </Text>
+                </View>
+              ) : (
+                <Text style={styles.noDetectionText}>
+                  {detection.prediction.message}
+                </Text>
+              )}
+            </View>
+          )}
+
+          {/* Processing indicator */}
+          {isProcessing && (
+            <View style={styles.processingContainer}>
+              <ActivityIndicator size="large" color="#ffffff" />
+            </View>
+          )}
+
+        </CameraView>
+      </View>
+
+      {/* Buttons */}
+      <View className="flex flex-row">
+        <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
+          <Text style={styles.text}>Flip Camera</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.button,
+            isDetecting ? styles.stopButton : styles.startButton,
+          ]}
+          onPress={toggleDetection}
+        >
+          <Text style={styles.text}>
+            {isDetecting ? "Stop Detection" : "Start Detection"}
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
