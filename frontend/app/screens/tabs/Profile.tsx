@@ -61,7 +61,7 @@ function Profile() {
         <Animated.View style={{ marginTop: marginRef.current }}>
           <TouchableOpacity
             className='p-4 border-2 rounded-full'
-            style={{ borderColor: colors.text, backgroundColor: buttonSelected === "Profile" ? colors.text : oppositeColors.text }}
+            style={{ borderColor: colors.text, backgroundColor: buttonSelected === "Profile" ? oppositeColors.background : colors.background }}
           >
             <UserRound stroke={!(buttonSelected === "Profile") ? colors.text : oppositeColors.text} />
           </TouchableOpacity>
@@ -70,7 +70,7 @@ function Profile() {
         <View>
           <TouchableOpacity
             className='p-4 border-2 rounded-full mt-6'
-            style={{ borderColor: colors.text, backgroundColor: buttonSelected === "Home" ? colors.text : oppositeColors.text }}
+            style={{ borderColor: colors.text, backgroundColor: buttonSelected === "Home" ? oppositeColors.background : colors.background }}
             onPress={() => fadeOutTo('Home')}
           >
             <HomeIcon stroke={!(buttonSelected === "Home") ? colors.text : oppositeColors.text} />
@@ -80,7 +80,7 @@ function Profile() {
         <Animated.View style={{ marginTop: marginRef.current }}>
           <TouchableOpacity
             className='p-4 border-2 rounded-full'
-            style={{ borderColor: colors.text, backgroundColor: buttonSelected === "Settings" ? colors.text : oppositeColors.text }}
+            style={{ borderColor: colors.text, backgroundColor: buttonSelected === "Settings" ? oppositeColors.background : colors.background }}
             onPress={() => fadeOutTo('Settings')}
           >
             <Settings stroke={!(buttonSelected === "Settings") ? colors.text : oppositeColors.text} />
