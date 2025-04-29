@@ -223,9 +223,9 @@ export default function App() {
           {/* Nunya detected */}
           {detection && detection.success && detection.prediction && detection.prediction.color === null && (
             <>
-              <View className="w-full h-[15%]" /> {/* This exists just for spacing */}
+              <View className={`w-full h-[${SVG_HEIGHT}]`} /> {/* This exists just for spacing */}
               <Text style={[TypeStyles.h1, { color: colors.text, textAlign: 'center' }]}>No traffic light detected</Text>
-              <View className="w-full h-[15%] bg-[#9E9E9E]" />
+              <View className={`w-full h-[${SVG_HEIGHT}] bg-[#9E9E9E]`} />
             </>
           )}
 
