@@ -61,7 +61,7 @@ def process_image():
             }
             
             if 'predictions' in prediction and prediction['predictions']:
-                traffic_light_color = ''
+                traffic_light_color = ""
                 image_detected = False
                
                 for light in prediction['predictions']: 
@@ -83,12 +83,14 @@ def process_image():
                 
                 if not image_detected:
                     result['prediction'] = {
+                        'color': "null",
                         'detected': False,
                         'message': 'No traffic image detected in the middle section.'
                     }
                     print("No traffic light detected in the middle section.")
             else:
                 result['prediction'] = {
+                    'color': "null",
                     'detected': False,
                     'message': 'No traffic light detected.'
                 }
