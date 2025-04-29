@@ -34,7 +34,7 @@ function Welcome() {
       <View className="flex flex-row-reverse mt-6">
         <TouchableOpacity
           className="flex flex-row items-center px-[18] py-[12] mt-6 bg-accent rounded-[8] gap-3"
-          onPress={() => router.navigate("/screens/tabs/Driving")}
+          onPress={() => router.navigate("/screens/onboarding/Login")}
         >
           <Text style={[TypeStyles.p, { color: colors.text }]}>
             Get Started
