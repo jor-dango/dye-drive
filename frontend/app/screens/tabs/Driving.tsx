@@ -1,4 +1,11 @@
-import { GoBottom, GoTop, StopBottom, StopTop, YieldBottom, YieldTop } from "@/components/ui/DrivingSVGs";
+import {
+  GoBottom,
+  GoTop,
+  StopBottom,
+  StopTop,
+  YieldBottom,
+  YieldTop,
+} from "@/components/ui/DrivingSVGs";
 import { Colors } from "@/constants/Colors";
 import TypeStyles from "@/constants/TypeStyles";
 import { useColorScheme } from "@/hooks/useColorScheme";
@@ -16,14 +23,14 @@ import {
   Alert,
 } from "react-native";
 
-const SVG_HEIGHT = '15%';
+const SVG_HEIGHT = "15%";
 type LightVisualization = {
-  key: string,
-  topElement: ReactElement,
-  bottomElement: ReactElement,
-  lightColor: string,
-  lightAction: string,
-  textSize: number
+  key: string;
+  topElement: ReactElement;
+  bottomElement: ReactElement;
+  lightColor: string;
+  lightAction: string;
+  textSize: number;
 };
 
 export default function App() {
@@ -36,79 +43,102 @@ export default function App() {
   const cameraRef = useRef<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [foundError, setFoundError] = useState(false);
-  const [userPrefs, setUserPrefs] = useState<{ audioalertstyle: string, visualalertstyle: string, colorblindnesstype: string, id: string, language: string } | null>(null);
+  const [userPrefs, setUserPrefs] = useState<{
+    audioalertstyle: string;
+    visualalertstyle: string;
+    colorblindnesstype: string;
+    id: string;
+    language: string;
+  } | null>(null);
   const colorScheme = useColorScheme();
-  const colors = Colors[colorScheme ?? 'light'];
-  
+  const colors = Colors[colorScheme ?? "light"];
+
   const lightColors = {
     green: "#03CA03",
     yellow: "#E2B500",
-    red: '#E10707'
+    red: "#E10707",
   };
   const lightText: LightVisualization[] = [
     {
-      key: 'green',
+      key: "green",
       topElement: <GoTop height={SVG_HEIGHT} color={colors.secondary} />,
       bottomElement: <GoBottom height={SVG_HEIGHT} color={lightColors.green} />,
-      lightColor: 'GREEN',
-      lightAction: 'GO',
-      textSize: 100
+      lightColor: "GREEN",
+      lightAction: "GO",
+      textSize: 100,
     },
     {
-      key: 'yellow',
+      key: "yellow",
       topElement: <YieldTop height={SVG_HEIGHT} color={colors.secondary} />,
-      bottomElement: <YieldBottom height={SVG_HEIGHT} color={lightColors.yellow} />,
-      lightColor: 'YELLOW',
-      lightAction: 'YIELD',
-      textSize: 100
+      bottomElement: (
+        <YieldBottom height={SVG_HEIGHT} color={lightColors.yellow} />
+      ),
+      lightColor: "YELLOW",
+      lightAction: "YIELD",
+      textSize: 100,
     },
     {
-      key: 'red',
+      key: "red",
       topElement: <StopTop height={SVG_HEIGHT} color={colors.secondary} />,
       bottomElement: <StopBottom height={SVG_HEIGHT} color={lightColors.red} />,
-      lightColor: 'RED',
-      lightAction: 'STOP',
-      textSize: 100
+      lightColor: "RED",
+      lightAction: "STOP",
+      textSize: 100,
     },
     {
-      key: '', // No light detected
-      topElement: <View style={{width: '100%', height: SVG_HEIGHT, backgroundColor: colors.secondary }} />, // This exists just for spacing
-      bottomElement: <View style={{width: '100%', height: SVG_HEIGHT, backgroundColor: "#9E9E9E"}} />,
-      lightColor: 'No light detected',
-      lightAction: 'No light detected',
-      textSize: TypeStyles.h1.fontSize
-    }
+      key: "", // No light detected
+      topElement: (
+        <View
+          style={{
+            width: "100%",
+            height: SVG_HEIGHT,
+            backgroundColor: colors.secondary,
+          }}
+        />
+      ), // This exists just for spacing
+      bottomElement: (
+        <View
+          style={{
+            width: "100%",
+            height: SVG_HEIGHT,
+            backgroundColor: "#9E9E9E",
+          }}
+        />
+      ),
+      lightColor: "No light detected",
+      lightAction: "No light detected",
+      textSize: TypeStyles.h1.fontSize,
+    },
   ];
-  const [currentLight, setCurrentLight] = useState<LightVisualization[]>(lightText.filter(light => light.key === ''));
-
+  const [currentLight, setCurrentLight] = useState<LightVisualization[]>(
+    lightText.filter((light) => light.key === "")
+  );
 
   useEffect(() => {
     async function loadPreferences() {
       try {
         setIsLoading(true);
-        const { data: { user } } = await supabase.auth.getUser();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
 
         if (user) {
           const { data, error } = await supabase
-            .from('userprefs')
-            .select('*')
-            .eq('id', user.id);
+            .from("userprefs")
+            .select("*")
+            .eq("id", user.id);
           if (error) {
             Alert.alert(error.message);
             setFoundError(true);
           }
           setUserPrefs(data![0]);
-        }
-        else {
+        } else {
           console.error("User not found.");
           setFoundError(true);
         }
-
-      }
-      catch (error) {
+      } catch (error) {
         console.error("Error fetching user: ", error);
-      }
-      finally {
+      } finally {
         if (foundError) {
           router.back();
         }
@@ -117,7 +147,7 @@ export default function App() {
       }
     }
     loadPreferences();
-  }, [])
+  }, []);
 
   // Backend URL - replace with your actual backend URL
   // SUBJECT TO CHANGE EVERY TIME I REOPEN THE NGROK ENDPOINT
@@ -131,9 +161,10 @@ export default function App() {
 
         // Take a picture
         const photo = await cameraRef.current.takePictureAsync({
-          quality: 0.5,
+          quality: 0.1,
           base64: false,
-          skipProcessing: true,
+          shutterSound: false,
+          skipProcessing: false,
         });
 
         // Create form data
@@ -153,6 +184,7 @@ export default function App() {
           },
         });
 
+        // Parse JSON response
         const result = await response.json();
         console.log("Traffic light detection result:", result);
         setDetection(result);
@@ -171,7 +203,7 @@ export default function App() {
     if (isDetecting) {
       interval = setInterval(() => {
         captureAndSendImage();
-      }, 500); // Send image every .5 milliseconds
+      }, 700); // Send image every second
     }
 
     return () => {
@@ -192,10 +224,16 @@ export default function App() {
 
   // Set the current light object to whatever the model detects the light is currently
   useEffect(() => {
-    if (detection !== null && detection.prediction !== null && detection.prediction.color) {
-      setCurrentLight(lightText.filter(light => light.key === detection.prediction.color));
+    if (
+      detection !== null &&
+      detection.prediction !== null &&
+      detection.prediction.color !== null
+    ) {
+      setCurrentLight(
+        lightText.filter((light) => light.key === detection.prediction.color)
+      );
     }
-    console.log(currentLight)
+    console.log(currentLight);
   }, [detection]);
 
   if (!permission) {
@@ -216,71 +254,56 @@ export default function App() {
   }
 
   return (
-    <View className='w-full h-full flex gap-4 px-5 pb-10 pt-20' style={{ backgroundColor: colors.background }}>
-
+    <View
+      className="w-full h-full flex gap-4 px-5 pb-10 pt-20"
+      style={{ backgroundColor: colors.background }}
+    >
       <View className="flex flex-row">
-        <TouchableOpacity className="bg-accent px-6 py-4 rounded-full" onPress={() => router.back()}>
-          <Text style={[TypeStyles.p, { color: colors.text }]}>Finish Drive</Text>
+        <TouchableOpacity
+          className="bg-accent px-6 py-4 rounded-full"
+          onPress={() => router.back()}
+        >
+          <Text style={[TypeStyles.p, { color: colors.text }]}>
+            Finish Drive
+          </Text>
         </TouchableOpacity>
       </View>
 
       {/* Visual Display */}
-      <View className="w-full flex-1 rounded-2xl overflow-hidden p-3" style={{ backgroundColor: colors.secondary }}>
-        <View className="w-full flex-1 rounded-lg overflow-hidden justify-between " style={{ backgroundColor: colors.background }}>
-            {currentLight[0].topElement}
-            <Text style={[TypeStyles.h1, { color: colors.text, textAlign: 'center', fontSize: currentLight[0].textSize }]}>
-              {userPrefs?.audioalertstyle === 'action' ? currentLight[0].lightAction : currentLight[0].lightColor}
-            </Text>
-            {currentLight[0].bottomElement}
+      <View
+        className="w-full flex-1 rounded-2xl overflow-hidden p-3"
+        style={{ backgroundColor: colors.secondary }}
+      >
+        <View
+          className="w-full flex-1 rounded-lg overflow-hidden justify-between "
+          style={{ backgroundColor: colors.background }}
+        >
+          {currentLight[0].topElement}
+          <Text
+            style={[
+              TypeStyles.h1,
+              {
+                color: colors.text,
+                textAlign: "center",
+                fontSize: currentLight[0].textSize,
+              },
+            ]}
+          >
+            {userPrefs?.audioalertstyle === "action"
+              ? currentLight[0].lightAction
+              : currentLight[0].lightColor}
+          </Text>
+          {currentLight[0].bottomElement}
         </View>
       </View>
 
       {/* Camera Wrapper */}
       <View className="w-full aspect-video rounded-2xl overflow-hidden">
-        <CameraView style={{ height: '100%', width: '100%' }} facing={facing} ref={cameraRef}>
-          {/* Guide lines for middle third */}
-          <View style={[styles.guideline, { left: "33%" }]} />
-          <View style={[styles.guideline, { left: "67%" }]} />
-
-          {/* Detection result display */}
-          {detection && detection.success && detection.prediction && (
-            <View style={styles.detectionContainer}>
-              {detection.prediction.detected ? (
-                <View
-                  style={[
-                    styles.trafficLight,
-                    detection.prediction.color === "red"
-                      ? styles.redLight
-                      : detection.prediction.color === "green"
-                        ? styles.greenLight
-                        : detection.prediction.color === "yellow"
-                          ? styles.yellowLight
-                          : styles.unknownLight,
-                  ]}
-                >
-                  <Text style={styles.lightText}>
-                    {detection.prediction.color.toUpperCase()}
-                  </Text>
-                  <Text style={styles.confidenceText}>
-                    {Math.round(detection.prediction.confidence * 100)}%
-                  </Text>
-                </View>
-              ) : (
-                <Text style={styles.noDetectionText}>
-                  {detection.prediction.message}
-                </Text>
-              )}
-            </View>
-          )}
-
-          {/* Processing indicator */}
-          {isProcessing && (
-            <View style={styles.processingContainer}>
-              <ActivityIndicator size="large" color="#ffffff" />
-            </View>
-          )}
-
-        </CameraView>
+        <CameraView
+          style={{ height: "100%", width: "100%" }}
+          facing={facing}
+          ref={cameraRef}
+        ></CameraView>
       </View>
 
       {/* Buttons */}

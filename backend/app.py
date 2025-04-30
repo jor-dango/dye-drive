@@ -1,7 +1,6 @@
 import cv2
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import time
 from dotenv import load_dotenv
 import os
 import base64
@@ -9,26 +8,38 @@ from inference_sdk import InferenceHTTPClient
 
 # Initialize the flask app
 app = Flask(__name__)
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16 MB
 CORS(app)  # Enable CORS for mobile app requests
 
 # Load environment variables
 load_dotenv()
 api_key = os.getenv("CV_KEY")
-print("api key is:", api_key)
 # Initialize Roboflow client
 CLIENT = InferenceHTTPClient(
     api_url="https://serverless.roboflow.com",
     api_key=api_key
 )
+@app.route('/', methods=['GET', 'POST'])
+def home():
+    return 'Flask is running and doing phenomenal!'
+# verifies that requests are coming in
+@app.before_request
+def log_request_info():
+    print(f"Received {request.method} request to {request.path}")
 
 # Route to process images from mobile app
 @app.route('/process-image', methods=['POST'])
 def process_image():
+    print('we processed an image')
+    print('request is: ',request.files)
     if 'image' not in request.files:
+        print('we found no image dawg')
         return jsonify({'error': 'No image provided'}), 400
     
     # Get the image file
     image_file = request.files['image']
+
+    print('we in here')
     
     try:
         # Convert image to OpenCV format to get dimensions
@@ -83,14 +94,14 @@ def process_image():
                 
                 if not image_detected:
                     result['prediction'] = {
-                        'color': "null",
+                        'color': "",
                         'detected': False,
                         'message': 'No traffic image detected in the middle section.'
                     }
                     print("No traffic light detected in the middle section.")
             else:
                 result['prediction'] = {
-                    'color': "null",
+                    'color': "",
                     'detected': False,
                     'message': 'No traffic light detected.'
                 }
@@ -114,4 +125,4 @@ def process_image():
 if __name__ == '__main__':
     # Add this import here to avoid issues if numpy isn't available
     import numpy as np
-    app.run(host='0.0.0.0', port=80, debug=True)
+    app.run(host='0.0.0.0', port=8000, debug=True)
