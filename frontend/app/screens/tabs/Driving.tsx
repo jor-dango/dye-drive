@@ -104,14 +104,14 @@ export default function App() {
           setFoundError(true);
         }
 
-        if (foundError) {
-          router.back();
-        }
       }
       catch (error) {
         console.error("Error fetching user: ", error);
       }
       finally {
+        if (foundError) {
+          router.back();
+        }
         setIsLoading(false);
         setFoundError(false);
       }
@@ -192,7 +192,7 @@ export default function App() {
 
   // Set the current light object to whatever the model detects the light is currently
   useEffect(() => {
-    if (detection && detection.prediction && detection.prediction.color) {
+    if (detection !== null && detection.prediction !== null && detection.prediction.color) {
       setCurrentLight(lightText.filter(light => light.key === detection.prediction.color));
     }
     console.log(currentLight)
