@@ -22,6 +22,7 @@ import {
   ActivityIndicator,
   Alert,
 } from "react-native";
+import { useAudioPlayer } from "expo-audio";
 
 const SVG_HEIGHT = "15%";
 type LightVisualization = {
@@ -52,6 +53,18 @@ export default function App() {
   } | null>(null);
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
+
+  const lightAudioMap = {
+    green: require("../../../assets/audio/green.m4a"),
+    yellow: require("../../../assets/audio/yellow.m4a"),
+    red: require("../../../assets/audio/red.m4a"),
+    none: require("../../../assets/audio/none.m4a"),
+  } as const;
+
+  const redPlayer = useAudioPlayer(lightAudioMap.red);
+  const greenPlayer = useAudioPlayer(lightAudioMap.green);
+  const yellowPlayer = useAudioPlayer(lightAudioMap.yellow);
+  const nonePlayer = useAudioPlayer(lightAudioMap.none);
 
   const lightColors = {
     green: "#03CA03",
@@ -166,6 +179,7 @@ export default function App() {
           shutterSound: false,
           skipProcessing: false,
         });
+        greenPlayer.play();
 
         // Create form data
         const formData = new FormData();
@@ -232,6 +246,22 @@ export default function App() {
       setCurrentLight(
         lightText.filter((light) => light.key === detection.prediction.color)
       );
+      const color = detection.prediction.color as keyof typeof lightAudioMap;
+
+      switch (color) {
+        case "green":
+          greenPlayer.play();
+          break;
+        case "yellow":
+          yellowPlayer.play();
+          break;
+        case "red":
+          redPlayer.play();
+          break;
+        case "none":
+          nonePlayer.play();
+          break;
+      }
     }
     console.log(currentLight);
   }, [detection]);
