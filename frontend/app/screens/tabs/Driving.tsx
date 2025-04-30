@@ -3,10 +3,9 @@ import { Colors } from "@/constants/Colors";
 import TypeStyles from "@/constants/TypeStyles";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { supabase } from "@/lib/supabase";
-import { User } from "@supabase/supabase-js";
 import { CameraView, CameraType, useCameraPermissions } from "expo-camera";
 import { useRouter } from "expo-router";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, ReactElement } from "react";
 import {
   Button,
   StyleSheet,
@@ -18,6 +17,14 @@ import {
 } from "react-native";
 
 const SVG_HEIGHT = '15%';
+type LightVisualization = {
+  key: string,
+  topElement: ReactElement,
+  bottomElement: ReactElement,
+  lightColor: string,
+  lightAction: string,
+  textSize: number
+};
 
 export default function App() {
   const router = useRouter();
@@ -27,69 +34,89 @@ export default function App() {
   const [detection, setDetection] = useState<any>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const cameraRef = useRef<any>(null);
-
+  const [isLoading, setIsLoading] = useState(false);
+  const [foundError, setFoundError] = useState(false);
+  const [userPrefs, setUserPrefs] = useState<{ audioalertstyle: string, visualalertstyle: string, colorblindnesstype: string, id: string, language: string } | null>(null);
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
+  
   const lightColors = {
     green: "#03CA03",
     yellow: "#E2B500",
     red: '#E10707'
   };
-  // const lightText = [
-  //   {
-  //     key: 'green',
-  //     topElement: <GoTop height={SVG_HEIGHT} color={colors.secondary} />,
-  //     bottomElement: <GoBottom height={SVG_HEIGHT} color={lightColors.green} />,
-  //     lightColor: 'GREEN',
-  //     lightAction: 'GO'
-  //   },
-  //   {
-  //     key: 'yellow',
-  //     topElement: <YieldTop height={SVG_HEIGHT} color={colors.secondary} />,
-  //     bottomElement: <YieldBottom height={SVG_HEIGHT} color={lightColors.green} />,
-  //     lightColor: 'YELLOW',
-  //     lightAction: 'YIELD'
-  //   },
-  //   {
-  //     key: 'red',
-  //     topElement: <StopTop height={SVG_HEIGHT} color={colors.secondary} />,
-  //     bottomElement: <StopBottom height={SVG_HEIGHT} color={lightColors.green} />,
-  //     lightColor: 'RED',
-  //     lightAction: 'STOP'
-  //   }
-  // ];
+  const lightText: LightVisualization[] = [
+    {
+      key: 'green',
+      topElement: <GoTop height={SVG_HEIGHT} color={colors.secondary} />,
+      bottomElement: <GoBottom height={SVG_HEIGHT} color={lightColors.green} />,
+      lightColor: 'GREEN',
+      lightAction: 'GO',
+      textSize: 100
+    },
+    {
+      key: 'yellow',
+      topElement: <YieldTop height={SVG_HEIGHT} color={colors.secondary} />,
+      bottomElement: <YieldBottom height={SVG_HEIGHT} color={lightColors.yellow} />,
+      lightColor: 'YELLOW',
+      lightAction: 'YIELD',
+      textSize: 100
+    },
+    {
+      key: 'red',
+      topElement: <StopTop height={SVG_HEIGHT} color={colors.secondary} />,
+      bottomElement: <StopBottom height={SVG_HEIGHT} color={lightColors.red} />,
+      lightColor: 'RED',
+      lightAction: 'STOP',
+      textSize: 100
+    },
+    {
+      key: '', // No light detected
+      topElement: <View style={{width: '100%', height: SVG_HEIGHT, backgroundColor: colors.secondary }} />, // This exists just for spacing
+      bottomElement: <View style={{width: '100%', height: SVG_HEIGHT, backgroundColor: "#9E9E9E"}} />,
+      lightColor: 'No light detected',
+      lightAction: 'No light detected',
+      textSize: TypeStyles.h1.fontSize
+    }
+  ];
+  const [currentLight, setCurrentLight] = useState<LightVisualization[]>(lightText.filter(light => light.key === ''));
 
-  const [loading, setLoading] = useState(false);
-  const [foundError, setFoundError] = useState(false);
-  const [userPrefs, setUserPrefs] = useState<User | null>(null);
 
   useEffect(() => {
     async function loadPreferences() {
-      setLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
+      try {
+        setIsLoading(true);
+        const { data: { user } } = await supabase.auth.getUser();
 
-      if (user) {
-        const { data, error } = await supabase
-          .from('userprefs')
-          .select('*')
-          .eq('id', user.id);
-        if (error) {
-          Alert.alert(error.message);
+        if (user) {
+          const { data, error } = await supabase
+            .from('userprefs')
+            .select('*')
+            .eq('id', user.id);
+          if (error) {
+            Alert.alert(error.message);
+            setFoundError(true);
+          }
+          setUserPrefs(data![0]);
+        }
+        else {
+          console.error("User not found.");
           setFoundError(true);
         }
-      }
-      else {
-        console.error("User not found.");
-        setFoundError(true);
-      }
 
-      if (foundError) {
-        router.back();
+        if (foundError) {
+          router.back();
+        }
       }
-      setUserPrefs(user);
-      setFoundError(false);
-      setLoading(false);
+      catch (error) {
+        console.error("Error fetching user: ", error);
+      }
+      finally {
+        setIsLoading(false);
+        setFoundError(false);
+      }
     }
+    loadPreferences();
   }, [])
 
   // Backend URL - replace with your actual backend URL
@@ -163,6 +190,14 @@ export default function App() {
     setFacing((current) => (current === "back" ? "front" : "back"));
   };
 
+  // Set the current light object to whatever the model detects the light is currently
+  useEffect(() => {
+    if (detection && detection.prediction && detection.prediction.color) {
+      setCurrentLight(lightText.filter(light => light.key === detection.prediction.color));
+    }
+    console.log(currentLight)
+  }, [detection]);
+
   if (!permission) {
     // Camera permissions are still loading
     return <View />;
@@ -192,43 +227,11 @@ export default function App() {
       {/* Visual Display */}
       <View className="w-full flex-1 rounded-2xl overflow-hidden p-3" style={{ backgroundColor: colors.secondary }}>
         <View className="w-full flex-1 rounded-lg overflow-hidden justify-between " style={{ backgroundColor: colors.background }}>
-
-          {/* Green */}
-          {detection && detection.success && detection.prediction && detection.prediction.color === "green" && (
-            <>
-              <GoTop height={SVG_HEIGHT} color={colors.secondary} />
-              <Text style={[TypeStyles.h1, { color: colors.text, textAlign: 'center', fontSize: 100 }]}>GO</Text>
-              <GoBottom height={SVG_HEIGHT} color={lightColors.green} />
-            </>
-          )}
-
-          {/* Yellow */}
-          {detection && detection.success && detection.prediction && detection.prediction.color === "yellow" && (
-            <>
-              <YieldTop height={SVG_HEIGHT} color={colors.secondary} />
-              <Text style={[TypeStyles.h1, { color: colors.text, textAlign: 'center', fontSize: 100 }]}>YIELD</Text>
-              <YieldBottom height={SVG_HEIGHT} color={lightColors.yellow} />
-            </>
-          )}
-
-          {/* Red */}
-          {detection && detection.success && detection.prediction && detection.prediction.color === "yellow" && (
-            <>
-              <StopTop height={SVG_HEIGHT} color={colors.secondary} />
-              <Text style={[TypeStyles.h1, { color: colors.text, textAlign: 'center', fontSize: 100 }]}>YIELD</Text>
-              <StopBottom height={SVG_HEIGHT} color={lightColors.red} />
-            </>
-          )}
-
-          {/* Nunya detected */}
-          {detection && detection.success && detection.prediction && detection.prediction.color === null && (
-            <>
-              <View className={`w-full h-[${SVG_HEIGHT}]`} /> {/* This exists just for spacing */}
-              <Text style={[TypeStyles.h1, { color: colors.text, textAlign: 'center' }]}>No traffic light detected</Text>
-              <View className={`w-full h-[${SVG_HEIGHT}] bg-[#9E9E9E]`} />
-            </>
-          )}
-
+            {currentLight[0].topElement}
+            <Text style={[TypeStyles.h1, { color: colors.text, textAlign: 'center', fontSize: currentLight[0].textSize }]}>
+              {userPrefs?.audioalertstyle === 'action' ? currentLight[0].lightAction : currentLight[0].lightColor}
+            </Text>
+            {currentLight[0].bottomElement}
         </View>
       </View>
 
