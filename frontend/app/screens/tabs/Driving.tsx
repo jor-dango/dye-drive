@@ -22,7 +22,7 @@ import {
   ActivityIndicator,
   Alert,
 } from "react-native";
-import { useAudioPlayer } from "expo-audio";
+import { Audio, AVPlaybackSource, AVPlaybackStatus } from "expo-av";
 
 const SVG_HEIGHT = "15%";
 type LightVisualization = {
@@ -44,6 +44,7 @@ export default function App() {
   const cameraRef = useRef<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [foundError, setFoundError] = useState(false);
+  const [sound, setSound] = useState<Audio.Sound | null>(null);
   const [userPrefs, setUserPrefs] = useState<{
     audioalertstyle: string;
     visualalertstyle: string;
@@ -53,18 +54,15 @@ export default function App() {
   } | null>(null);
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? "light"];
-
-  const lightAudioMap = {
+  const soundFiles: Record<
+    "green" | "yellow" | "red" | "none",
+    AVPlaybackSource
+  > = {
     green: require("../../../assets/audio/green.m4a"),
     yellow: require("../../../assets/audio/yellow.m4a"),
     red: require("../../../assets/audio/red.m4a"),
     none: require("../../../assets/audio/none.m4a"),
-  } as const;
-
-  const redPlayer = useAudioPlayer(lightAudioMap.red);
-  const greenPlayer = useAudioPlayer(lightAudioMap.green);
-  const yellowPlayer = useAudioPlayer(lightAudioMap.yellow);
-  const nonePlayer = useAudioPlayer(lightAudioMap.none);
+  };
 
   const lightColors = {
     green: "#03CA03",
@@ -179,7 +177,6 @@ export default function App() {
           shutterSound: false,
           skipProcessing: false,
         });
-        greenPlayer.play();
 
         // Create form data
         const formData = new FormData();
@@ -235,35 +232,45 @@ export default function App() {
   const toggleCameraFacing = () => {
     setFacing((current) => (current === "back" ? "front" : "back"));
   };
+  const lastColorRef = useRef<string | null>(null); // tracks last detected color
 
   // Set the current light object to whatever the model detects the light is currently
   useEffect(() => {
-    if (
-      detection !== null &&
-      detection.prediction !== null &&
-      detection.prediction.color !== null
-    ) {
-      setCurrentLight(
-        lightText.filter((light) => light.key === detection.prediction.color)
-      );
-      const color = detection.prediction.color as keyof typeof lightAudioMap;
-
-      switch (color) {
-        case "green":
-          greenPlayer.play();
-          break;
-        case "yellow":
-          yellowPlayer.play();
-          break;
-        case "red":
-          redPlayer.play();
-          break;
-        case "none":
-          nonePlayer.play();
-          break;
+    const playSoundForColor = async (
+      color: "green" | "yellow" | "red" | "none"
+    ) => {
+      try {
+        const { sound: newSound } = await Audio.Sound.createAsync(
+          soundFiles[color]
+        );
+        setSound(newSound);
+        await newSound.playAsync();
+      } catch (err) {
+        console.warn("Audio playback error:", err);
       }
+    };
+
+    const detectedColor = detection?.prediction?.color as
+      | "green"
+      | "yellow"
+      | "red"
+      | null;
+
+    if (detectedColor && detectedColor !== lastColorRef.current) {
+      lastColorRef.current = detectedColor;
+
+      setCurrentLight(lightText.filter((light) => light.key === detectedColor));
+
+      // Play corresponding sound
+      playSoundForColor(detectedColor);
+    } else if (!detectedColor && lastColorRef.current !== "none") {
+      lastColorRef.current = "none";
+
+      setCurrentLight(lightText.filter((light) => light.key === ""));
+      playSoundForColor("none");
     }
-    console.log(currentLight);
+
+    console.log("Current light:", currentLight);
   }, [detection]);
 
   if (!permission) {
