@@ -209,12 +209,12 @@ export default function App() {
 
   // Set up interval for continuous detection
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
 
     if (isDetecting) {
       interval = setInterval(() => {
         captureAndSendImage();
-      }, 700); // Send image every second
+      }, 700); // Send image every
     }
 
     return () => {
