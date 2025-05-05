@@ -62,43 +62,40 @@ export default function Auth() {
             className="w-full h-full flex gap-4 px-5 pb-10 pt-20"
             style={{ backgroundColor: colors.background }}
         >
-            <View style={[styles.verticallySpaced, styles.mt20]}>
-                <Input
-                    label="Email"
-                    leftIcon={{ type: 'font-awesome', name: 'envelope' }}
-                    onChangeText={(text) => setEmail(text)}
-                    value={email}
-                    placeholder="email@address.com"
-                    autoCapitalize={'none'}
-                    style={[TypeStyles.p, { color: colors.text }]}
-                />
+            <Text style={[TypeStyles.h1, { color: colors.text }]}>Sign In</Text>
+            <Input
+                label="Email"
+                onChangeText={(text) => setEmail(text)}
+                value={email}
+                placeholder="email@address.com"
+                autoCapitalize={'none'}
+                style={[TypeStyles.p, { color: colors.text }]}
+            />
+            <Input
+                label="Password"
+                onChangeText={(text) => setPassword(text)}
+                value={password}
+                secureTextEntry={true}
+                placeholder="Enter password here"
+                autoCapitalize={'none'}
+                style={[TypeStyles.p, { color: colors.text }]}
+            />
+            <View className='flex gap-2'>
+                <TouchableOpacity
+                    className={`${loading ? 'opacity-20' : ''} flex flex-row items-center justify-center px-[18] py-[12] mt-6 bg-accent rounded-[8] gap-3`}
+                    onPress={() => signInWithEmail()}
+                    disabled={loading}
+                >
+                    <Text style={[TypeStyles.p, { color: colors.text }]}>Sign In</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    className={`${loading ? 'opacity-20' : ''} flex flex-row items-center justify-center px-[18] py-[12] mt-6 border border-accent rounded-[8] gap-3`}
+                    onPress={() => signUpWithEmail()}
+                    disabled={loading}
+                >
+                    <Text style={[TypeStyles.p, { color: colors.text }]}>Sign Up</Text>
+                </TouchableOpacity>
             </View>
-            <View style={styles.verticallySpaced}>
-                <Input
-                    label="Password"
-                    leftIcon={{ type: 'font-awesome', name: 'lock' }}
-                    onChangeText={(text) => setPassword(text)}
-                    value={password}
-                    secureTextEntry={true}
-                    placeholder="Password"
-                    autoCapitalize={'none'}
-                    style={[TypeStyles.p, { color: colors.text }]}
-                />
-            </View>
-            <TouchableOpacity
-                className={`${loading ? 'opacity-20' : ''} flex flex-row items-center justify-between px-[18] py-[12] mt-6 bg-accent rounded-[8] gap-3`}
-                onPress={() => signInWithEmail()}
-                disabled={loading}
-            >
-                <Text style={[TypeStyles.p, { color: colors.text }]}>Sign In</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-                className={`${loading ? 'opacity-20' : ''} flex flex-row items-center justify-between px-[18] py-[12] mt-6 bg-accent rounded-[8] gap-3`}
-                onPress={() => signUpWithEmail()}
-                disabled={loading}
-            >
-                <Text style={[TypeStyles.p, { color: colors.text }]}>Sign Up</Text>
-            </TouchableOpacity>
         </View>
     )
 }

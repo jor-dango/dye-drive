@@ -69,13 +69,13 @@ function Profile() {
 
   return (
     <View className='w-full h-full flex gap-4 p-10 pt-20' style={{ backgroundColor: colors.background }}>
-      <Animated.View style={{ opacity: fadeOutVal }} className={'bg-accent w-full flex-1'}>
+      <Animated.View style={{ opacity: fadeOutVal }} className={'w-full flex-1'}>
         <TouchableOpacity
-          className={`${loading ? 'opacity-20' : ''} flex flex-row items-center justify-between px-[18] py-[12] mt-6 bg-accent rounded-[8] gap-3`}
+          className={`${loading ? 'opacity-20' : ''} flex flex-row items-center justify-center px-[18] py-[12] mt-6 bg-accent rounded-[8] gap-3`}
           onPress={handleLogOut}
           disabled={loading}
         >
-          <Text style={[TypeStyles.p, { color: colors.text }]}>Sign In</Text>
+          <Text style={[TypeStyles.p, { color: colors.text }]}>Log Out</Text>
         </TouchableOpacity>
       </Animated.View>
 
