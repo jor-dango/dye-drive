@@ -1,10 +1,11 @@
+import { Icon, IconBackdrop } from '@/assets/images/Icon';
 import { Colors } from '@/constants/Colors';
 import TypeStyles from '@/constants/TypeStyles';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useRouter } from 'expo-router';
 import { ArrowRight } from 'lucide-react-native';
 import React, { useEffect } from 'react'
-import { Text, TouchableOpacity, View } from 'react-native'
+import { Image, Text, TouchableOpacity, View } from 'react-native'
 
 function Welcome() {
   const router = useRouter();
@@ -23,7 +24,10 @@ function Welcome() {
       className="w-full h-full flex gap-3 p-10 py-20"
       style={{ backgroundColor: colors.background }}
     >
-      <View className="flex w-full flex-1 bg-[#353738] rounded-2xl" />
+      <View className='absolute flex w-full h-full items-center -z-10'>
+        <IconBackdrop color={colors.secondary} width={'90%'}/> 
+      </View>
+      <Icon color={colors.text} width={'25%'} />
       <Text style={[TypeStyles.h2, { color: colors.text }]}>
         Start your journey with Dye Drive.
       </Text>
