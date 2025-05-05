@@ -29,16 +29,6 @@ function Home() {
     }
   }, []);
 
-  async function handlePress() {
-    try {
-      const { error } = await supabase.auth.signOut();
-      router.navigate("/")
-    }
-    catch (error) {
-      console.error(error);
-    }
-  }
-
   function fadeOutTo(route: ProfileRoutes) {
     Animated.timing(fadeOutVal, {
       toValue: 0,
@@ -73,7 +63,6 @@ function Home() {
       {/* Main content */}
       <Animated.View className='flex-1' style={{ opacity: fadeOutVal }}>
         <Text style={[TypeStyles.h1, { color: colors.text, textAlign: 'center' }]}>Welcome back!</Text>
-        <Button title="log out" onPress={handlePress} />
         <View className='flex-1' />
         <View className='w-full flex items-center gap-4'>
           <Text style={[TypeStyles.p, { color: colors.text }]}>Start a drive</Text>
